@@ -8,6 +8,20 @@ export function TreeMap(props) {
 
     const color = scaleOrdinal(schemeDark2);
 
+    if (!tree || !tree.children || tree.children.length === 0) {
+        return (
+            <svg
+                viewBox={`0 0 ${svg_width} ${svg_height}`}
+                preserveAspectRatio="xMidYMid meet"
+                style={{ width: "100%", height: "100%" }}
+            >
+                <text x={svg_width / 2} y={svg_height / 2} textAnchor="middle" style={{ fontSize: "14px", fill: "#888" }}>
+                    Select at least one attribute
+                </text>
+            </svg>
+        );
+    }
+
     const root = hierarchy(tree)
         .sum(d => d.value)
         .sort((a, b) => b.value - a.value);
@@ -38,10 +52,11 @@ export function TreeMap(props) {
                 {leaves.map((node, i) => {
                     const w = node.x1 - node.x0;
                     const h = node.y1 - node.y0;
+
                     const ancestors = [];
                     let current = node;
                     while (current.parent) {
-                        if (current.data.attr) {
+                        if (current.data.attr !== undefined) {
                             ancestors.unshift(`${current.data.attr}: ${current.data.name}`);
                         }
                         current = current.parent;
@@ -49,7 +64,11 @@ export function TreeMap(props) {
                     const lines = [...ancestors, `Value: ${node.value}`];
 
                     return (
-                        <g key={i} onClick={() => setSelectedCell(node)} style={{ cursor: "pointer" }}>
+                        <g
+                            key={i}
+                            onClick={() => setSelectedCell(node)}
+                            style={{ cursor: "pointer" }}
+                        >
                             <rect
                                 x={node.x0}
                                 y={node.y0}
@@ -62,7 +81,11 @@ export function TreeMap(props) {
                             />
                             <text style={{ fontSize: "12px", fill: "white", pointerEvents: "none" }}>
                                 {lines.map((line, idx) => (
-                                    <tspan key={idx} x={node.x0 + 4} dy={idx === 0 ? node.y0 + 14 : 14}>
+                                    <tspan
+                                        key={idx}
+                                        x={node.x0 + 4}
+                                        dy={idx === 0 ? node.y0 + 14 : 14}
+                                    >
                                         {line}
                                     </tspan>
                                 ))}
